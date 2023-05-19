@@ -8,6 +8,16 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 fastapi = "^0.95.0"
+redis = {version = "^4.5.5", extras = ["hiredis"]}
+httpx = "^0.24.1"
+datetime = "^5.1"
+gunicorn = "^20.1.0"
+psutil = "^5.9.5"
+loguru = "^0.7.0"
+python-dotenv = "^1.0.0"
+logging = "^0.4.9.6"
+inotify = "^0.2.10"
+uvicorn = {version = "^0.22.0", extras = ["standard"]}
 
 
 [build-system]
