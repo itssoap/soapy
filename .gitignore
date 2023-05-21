@@ -1,0 +1,9 @@
+backup.py
+__pycache__/
+.vscode/
+
+*.pyc
+.env
+*.txt
+*.db
+*.rdb
