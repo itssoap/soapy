@@ -30,11 +30,19 @@ def hashfunc() -> str:
                 'ya', 'ye', 'yi', 'yo', 'yu', 
                 'za', 'ze', 'zi', 'zo', 'zu']
 
-    hash = ''.join([radicals[x] for x in random.choices(range(len(radicals)), k=5)])
+    while(1):
+        hash = ''.join([radicals[x] for x in random.choices(range(len(radicals)), k=5)])
+        if redischeck(hash) is False:
+            break
 
-    return hash if redischeck(hash) else hashfunc()
+    return redisadd(hash)
 
-async def redischeck(hash: str) -> bool:
-    redis = Redis(host="localhost", port=6379, decode_responses=True, encoding="utf-8")
-    await redis.sadd("hashpool", "initial")
-    return await redis.sismember("hashpool", hash)
+def redischeck(hash: str) -> bool:
+    redis = Redis(host="localhost", port=6379)
+    redis.sadd("hashpool", "initial")
+    return redis.sismember("hashpool", hash)
+
+def redisadd(hash: str) -> str:
+    redis = Redis(host="localhost", port=6379)
+    redis.sadd("hashpool", hash)
+    return hash
