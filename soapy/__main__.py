@@ -31,12 +31,14 @@ log_level = logging.getLevelName("INFO")
 
 
 redis = Redis()
+PASTE_URL = None
 
 @app.on_event("startup")
 def startup():
     load_dotenv()
-    global redis
-    redis = Redis(host="localhost", port=6379, decode_responses=True, encoding="utf-8")
+    global redis, PASTE_URL
+    redis = Redis(host="localhost", port=6379, decode_responses=False, encoding="utf-8")
+    PASTE_URL = os.getenv("PASTE_URL")
 
 
 class ResponseItem(BaseModel):
@@ -51,28 +53,29 @@ class ResponseItem(BaseModel):
 async def getter() -> Response:  # type: ignore
     return HTMLResponse(content="Hello world!", status_code=200)
 
-@app.get("/data/{hash_key}", response_model=None, response_class=Response)
+@app.get("/{hash_key}", response_model=None, response_class=Response)
 async def getter(hash_key: str) -> Response:  # type: ignore
-    value = brotli.decompress(redis.get(hash_key).encode().decode('unicode_escape').encode("raw_unicode_escape")[2:-1])
+    value = brotli.decompress(redis.get(hash_key)) #.encode().decode('unicode_escape').encode("raw_unicode_escape")[3:-1])
     return Response(content=value, status_code=200)
 
 
+# @app.post("/", response_model=None, response_class=Response)
+# async def poster(request: Request) -> Response: # type: ignore
+#     text = await request.body() # plan to save raw text as is in the database
+#     return Response(content=zlib.compress(text, level=9), status_code=200)
+
+# @app.post("/uncompress", response_model=None, response_class=Response)
+# async def poster(request: Request) -> Response: # type: ignore
+#     text = await request.body() # plan to save raw text as is in the database
+#     return Response(content=text.decode(), status_code=200)
+
+
 @app.post("/", response_model=None, response_class=Response)
-async def poster(request: Request) -> Response: # type: ignore
-    text = await request.body() # plan to save raw text as is in the database
-    return Response(content=zlib.compress(text, level=9), status_code=200)
-
-@app.post("/uncompress", response_model=None, response_class=Response)
-async def poster(request: Request) -> Response: # type: ignore
-    text = await request.body() # plan to save raw text as is in the database
-    return Response(content=text.decode(), status_code=200)
-
-@app.post("/brotli", response_model=None, response_class=Response)
 async def poster(request: Request): # type: ignore
     text = await request.body() # plan to save raw text as is in the database
     hash = hashfunc()
     redis.set(hash, brotli.compress(text, quality=11))
-    return Response(content=f"http://localhost:8010/{hash}", status_code=200)
+    return Response(content=f"{PASTE_URL}/{hash}", status_code=200)
 
 
 if __name__ == "__main__":
