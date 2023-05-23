@@ -58,7 +58,14 @@ async def getter() -> Response:  # type: ignore
 
 @app.get("/{hash_key}", response_model=None, response_class=Response)
 async def getter(hash_key: str, raw: str | None = None) -> HTMLResponse | Response:  # type: ignore
-    value = brotli.decompress(redis.get(hash_key))          #.encode().decode('unicode_escape').encode("raw_unicode_escape")[3:-1])
+    value = "" # important
+    try:
+        value = brotli.decompress(redis.get(hash_key))          #.encode().decode('unicode_escape').encode("raw_unicode_escape")[3:-1])
+    except TypeError as e:
+        if str(e) != "object of type 'NoneType' has no len()":
+            raise
+        else:
+            pass
     if raw not in ("True", "true", "1"):
         value = colors(value)
         return HTMLResponse(content=value + "<link rel=\"stylesheet\" href=\"static/styles.css\">", status_code=200)
