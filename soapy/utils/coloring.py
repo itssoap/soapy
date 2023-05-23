@@ -1,8 +1,8 @@
-from pygments import highlight
+from pygments import highlight, util
 from pygments.lexers import get_lexer_by_name, guess_lexer
 from pygments.formatters import HtmlFormatter
 
 def colors(text: str) -> str:
-    lexer = get_lexer_by_name(guess_lexer(text).name, stripall=True)
-    formatter = HtmlFormatter(linenos=True, cssclass="source")
+    lexer = guess_lexer(text)  
+    formatter = HtmlFormatter(linenos=True, style='github-dark')
     return highlight(text, lexer, formatter)
