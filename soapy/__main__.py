@@ -1,4 +1,3 @@
-from hashing import hashfunc
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, Response
 
@@ -21,6 +20,8 @@ from utils import (
     StubbedGunicornLogger,
     InterceptHandler,
     StandaloneApplication,
+    hashfunc,
+    colors
 )
 
 
