@@ -66,7 +66,7 @@ async def getter(hash_key: str, raw: str | None = None) -> HTMLResponse | Respon
             raise
         else:
             pass
-    if raw not in ("True", "true", "1"):
+    if raw in ("False", "false", "0"):
         value = colors(value)
         return HTMLResponse(content=value + "<link rel=\"stylesheet\" href=\"static/styles.css\">", status_code=200)
     return Response(content=value, status_code=200)
