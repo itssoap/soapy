@@ -22,7 +22,8 @@ from utils import (
     InterceptHandler,
     StandaloneApplication,
     hashfunc,
-    colors
+    colors,
+    markdown
 )
 
 
@@ -84,11 +85,31 @@ async def getter(hash_key: str, raw: str | None = None) -> HTMLResponse | Respon
 
 
 @app.post("/", response_model=None, response_class=Response)
-async def poster(request: Request): # type: ignore
+async def poster(request: Request) -> Response: # type: ignore
     text = await request.body() # plan to save raw text as is in the database
     hash = hashfunc()
     redis.set(hash, brotli.compress(text, quality=11))
     return Response(content=f"{PASTE_URL}/{hash}", status_code=200)
+
+@app.post("/md", response_model=None, response_class=Response)
+async def poster(request: Request) -> Response: # type: ignore
+    text = await request.body() # plan to save raw text as is in the database
+    hash = hashfunc()
+    redis.set(hash, brotli.compress(text, quality=11))
+    return Response(content=f"{PASTE_URL}/{hash}", status_code=200)
+
+@app.get("/md/{hash_key}", response_model=None, response_class=Response)
+async def getter(hash_key: str, raw: str | None = None) -> HTMLResponse | Response:  # type: ignore
+    value = "" # important
+    try:
+        value = brotli.decompress(redis.get(hash_key))          #.encode().decode('unicode_escape').encode("raw_unicode_escape")[3:-1])
+    except TypeError as e:
+        if str(e) != "object of type 'NoneType' has no len()":
+            raise
+        else:
+            pass
+            
+    return HTMLResponse(content=markdown(value), status_code=200)
 
 
 if __name__ == "__main__":
